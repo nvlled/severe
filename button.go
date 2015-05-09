@@ -10,9 +10,10 @@ import (
 
 type button struct {
 	Focusable
-	lines  []string
-	width  int
-	height int
+	lines      []string
+	width      int
+	height     int
+	Controller func(*control.Flow)
 }
 
 func Button(text string) *button {
@@ -52,4 +53,7 @@ func (btn *button) Render(canvas wind.Canvas) {
 }
 
 func (btn *button) Control(flow *control.Flow) {
+	if btn.Controller != nil {
+		btn.Controller(flow)
+	}
 }

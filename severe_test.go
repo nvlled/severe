@@ -270,8 +270,27 @@ func TestSevere1(t *testing.T) {
 	colorList := Listbox(10, 10, ItemSlice([]string{
 		"default", "red", "blue", "yellow", "green",
 	}))
-	editBtn := Label("|edit text|")
-	setColorBtn := Label("|set bgcolor|")
+
+	editBtn := Button("|edit text|")
+	editBtn.Controller = func(flow *control.Flow) {
+		flow.New(
+			control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)},
+			func(flow *control.Flow) {
+				editor.Control(flow)
+			})
+	}
+
+	color := uint16(term.ColorDefault)
+	setColorBtn := Button("|set bgcolor|")
+	setColorBtn.Controller = func(flow *control.Flow) {
+		flow.New(
+			control.Opts{Interrupt: control.KeyInterrupt(term.KeyEnter)},
+			func(flow *control.Flow) {
+				colorList.Control(flow)
+				_, colorName := colorList.SelectedItem()
+				color = uint16(colorValue(colorName))
+			})
+	}
 
 	layer := wind.Vlayer(
 		wind.Hlayer(
@@ -295,7 +314,6 @@ func TestSevere1(t *testing.T) {
 		** Ctrl-c to exit`),
 	)
 
-	color := uint16(term.ColorDefault)
 	layer = wind.TapRender(layer, func(layer wind.Layer, canvas wind.Canvas) {
 		canvas = wind.ChangeDefaultColor(color, 0, canvas)
 		layer.Render(canvas)
@@ -328,32 +346,16 @@ func TestSevere1(t *testing.T) {
 				focuser.FocusRight()
 			case term.KeyEnter:
 				component := focuser.Current()
+
 				component.Unfocus()
+
 				drawLayer()
+				flow.New(
+					control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)},
+					func(flow *control.Flow) {
+						component.Control(flow)
+					})
 
-				// *** TODO:
-				//flow.New(
-				//	control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)},
-				//	func(flow *control.Flow) {
-				//		component.Control(flow)
-				//      editBtn.handler = func() { }
-				//	})
-
-				if component == editBtn {
-					flow.New(
-						control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)},
-						func(flow *control.Flow) {
-							editor.Control(flow)
-						})
-				} else if component == setColorBtn {
-					flow.New(
-						control.Opts{Interrupt: control.KeyInterrupt(term.KeyEnter)},
-						func(flow *control.Flow) {
-							colorList.Control(flow)
-							_, colorName := colorList.SelectedItem()
-							color = uint16(colorValue(colorName))
-						})
-				}
 				component.Focus()
 			}
 		},
