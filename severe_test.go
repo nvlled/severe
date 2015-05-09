@@ -136,6 +136,8 @@ func TestListbox(t *testing.T) {
 	lbox := Listbox(20, 5, items)
 	layer := wind.Vlayer(
 		wind.Border('-', '|', lbox),
+		wind.Text(`** Ctrl-c to exit`),
+		wind.Text(`** Enter to select`),
 	)
 
 	drawLayer := func() {
@@ -180,11 +182,15 @@ func TestTextbox(t *testing.T) {
 	term.Init()
 	canvas := wind.NewTermCanvas()
 
-	tbox := Textbox(20, 10)
+	tbox := Textbox(50, 10)
 	buffer := newTestBuffer()
 	tbox.buffer = buffer
 	layer := wind.Vlayer(
 		wind.Border('-', '|', tbox),
+		wind.Text("** Arrow keys to move cursor"),
+		wind.Text("** Ctrl-c to exit"),
+		wind.Text("** Enter key to insert newline"),
+		wind.Text("** Backspace probably doesn't work, use delete key"),
 	)
 	drawLayer := func() {
 		term.Clear(0, 0)
@@ -217,6 +223,10 @@ func TestToolbar(t *testing.T) {
 	)
 	layer := wind.Vlayer(
 		wind.Border('-', '|', tbar),
+		wind.Text(`
+		** Arrow keys to move cursor
+		** Enter to select
+		** Ctrl-c to cancel`),
 	)
 	drawLayer := func() {
 		term.Clear(0, 0)
@@ -264,8 +274,6 @@ func TestSevere1(t *testing.T) {
 	setColorBtn := Label("|set bgcolor|")
 
 	layer := wind.Vlayer(
-		wind.Text("(Use arrow keys to control components)"),
-		wind.Line('─'),
 		wind.Hlayer(
 			wind.Vlayer(
 				wind.Text("editor"),
@@ -279,6 +287,12 @@ func TestSevere1(t *testing.T) {
 				setColorBtn,
 			),
 		),
+		wind.Line('─'),
+		wind.Text(`
+		** Arrow keys to move focus
+		** Enter to control focused component
+		** Esc to stop component control
+		** Ctrl-c to exit`),
 	)
 
 	color := uint16(term.ColorDefault)
@@ -294,6 +308,8 @@ func TestSevere1(t *testing.T) {
 		term.Flush()
 	}
 
+	// TODO:
+	// focuser := NewFocuser(extractGroup(layer))
 	focuser := NewFocuser(XGroup(CompGroup(editBtn), CompGroup(setColorBtn)))
 
 	drawLayer()
@@ -314,6 +330,15 @@ func TestSevere1(t *testing.T) {
 				component := focuser.Current()
 				component.Unfocus()
 				drawLayer()
+
+				// *** TODO:
+				//flow.New(
+				//	control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)},
+				//	func(flow *control.Flow) {
+				//		component.Control(flow)
+				//      editBtn.handler = func() { }
+				//	})
+
 				if component == editBtn {
 					flow.New(
 						control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)},
