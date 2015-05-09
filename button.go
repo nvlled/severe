@@ -8,14 +8,14 @@ import (
 	"strings"
 )
 
-type label struct {
+type button struct {
 	Focusable
 	lines  []string
 	width  int
 	height int
 }
 
-func Label(text string) *label {
+func Button(text string) *button {
 	lines := strings.Split(text, "\n")
 	maxw := 0
 	for _, line := range lines {
@@ -24,32 +24,32 @@ func Label(text string) *label {
 			maxw = w
 		}
 	}
-	return &label{
+	return &button{
 		width:  maxw,
 		height: len(lines),
 		lines:  lines,
 	}
 }
 
-func (l *label) Width() size.T {
-	return size.Const(l.width)
+func (btn *button) Width() size.T {
+	return size.Const(btn.width)
 }
 
-func (l *label) Height() size.T {
-	return size.Const(l.height)
+func (btn *button) Height() size.T {
+	return size.Const(btn.height)
 }
 
-func (l *label) Render(canvas wind.Canvas) {
+func (btn *button) Render(canvas wind.Canvas) {
 	bg := term.ColorDefault
-	if l.IsFocused() {
+	if btn.IsFocused() {
 		bg = term.ColorRed
 	}
-	for y, row := range l.lines {
+	for y, row := range btn.lines {
 		for x, c := range row {
 			canvas.Draw(x, y, c, 0, uint16(bg))
 		}
 	}
 }
 
-func (_ *label) Control(flow *control.Flow) {
+func (btn *button) Control(flow *control.Flow) {
 }
