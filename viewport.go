@@ -34,6 +34,32 @@ func (view *Viewport) CursorHome() {
 	view.offX = 0
 }
 
+func (view *Viewport) CursorStartX() {
+	view.cursX = 0
+	view.offX = 0
+	view.FocusCursor()
+}
+
+func (view *Viewport) CursorStartY() {
+	view.cursY = 0
+	view.offY = 0
+	view.FocusCursor()
+}
+
+func (view *Viewport) CursorEndX() {
+	boundsX, _ := view.pointBounds()
+	view.cursX = view.w - 1
+	view.offX = boundsX - view.w + 1
+	view.FocusCursor()
+}
+
+func (view *Viewport) CursorEndY() {
+	_, boundsY := view.pointBounds()
+	view.cursY = view.h - 1
+	view.offY = boundsY - view.h
+	view.FocusCursor()
+}
+
 func (view *Viewport) CursorLeft() {
 	if view.cursX > 0 {
 		view.cursX--
@@ -83,6 +109,7 @@ func (view *Viewport) pointBounds() (int, int) {
 	return view.bounds(x, y)
 }
 
+// TODO: check bounds
 func (view *Viewport) SetCursorX(x int) {
 	view.cursX = x
 	view.repositionCursor()
@@ -90,7 +117,7 @@ func (view *Viewport) SetCursorX(x int) {
 
 func (view *Viewport) SetCursorY(y int) {
 	view.cursY = y
-	view.repositionCursor()
+	view.FocusCursor()
 }
 
 func (view *Viewport) repositionCursor() {
@@ -102,7 +129,8 @@ func (view *Viewport) repositionCursor() {
 }
 
 func (view *Viewport) FocusCursor() {
-	boundsX, _ := view.pointBounds()
+	boundsX, boundsY := view.pointBounds()
+
 	if view.cursX > view.w {
 		cursX := view.cursX + view.offX
 		view.offX = boundsX - view.w
@@ -111,6 +139,16 @@ func (view *Viewport) FocusCursor() {
 	if view.cursX < 0 {
 		view.offX = view.offX + view.cursX
 		view.cursX = 0
+	}
+
+	if view.cursY > view.h {
+		cursY := view.cursY + view.offY
+		view.offY = boundsY - view.h
+		view.cursY = cursY - view.offY
+	}
+	if view.cursY < 0 {
+		view.offY = view.offY + view.cursY
+		view.cursY = 0
 	}
 }
 
