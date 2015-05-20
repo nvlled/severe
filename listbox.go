@@ -109,6 +109,9 @@ func (lbox *Listbox) SelectUp() {
 func (lbox *Listbox) SelectedItem() (int, string) {
 	_, i := lbox.view.Point()
 	items := lbox.Items.GetItems()
+	if i < 0 || i >= len(items) {
+		return -1, ""
+	}
 	return i, items[i]
 }
 

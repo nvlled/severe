@@ -95,7 +95,9 @@ func (tbox *Textbox) Render(canvas wind.Canvas) {
 		}
 	}
 	cx, cy := view.Cursor()
-	canvas.Draw(cx, cy, tbox.buffer[oy+cy][ox+cx], 0, uint16(term.ColorBlue))
+	if oy+cy < len(tbox.buffer) && ox+cx < len(tbox.buffer[oy+cy]) {
+		canvas.Draw(cx, cy, tbox.buffer[oy+cy][ox+cx], 0, uint16(term.ColorBlue))
+	}
 }
 
 func (tbox *Textbox) InsertChar(ch rune) {
@@ -129,7 +131,6 @@ func (tbox *Textbox) InsertNewline() {
 	}
 
 	tbox.view.CursorDown()
-	tbox.view.CursorHome()
 }
 
 func (tbox *Textbox) DeleteBack() {

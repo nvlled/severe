@@ -32,6 +32,9 @@ func (view *Viewport) Size() (int, int) {
 func (view *Viewport) CursorHome() {
 	view.cursX = 0
 	view.offX = 0
+	view.cursY = 0
+	view.offY = 0
+	view.FocusCursor()
 }
 
 func (view *Viewport) CursorStartX() {
@@ -121,9 +124,12 @@ func (view *Viewport) SetCursorY(y int) {
 }
 
 func (view *Viewport) repositionCursor() {
-	boundsX, _ := view.pointBounds()
-	if view.offX+view.cursX >= boundsX {
+	boundsX, boundsY := view.pointBounds()
+	if view.w > 1 && view.offX+view.cursX >= boundsX {
 		view.cursX = boundsX - view.offX
+	}
+	if view.h > 1 && view.offY+view.cursY >= boundsY {
+		view.cursY = boundsY - view.offY - 1
 	}
 	view.FocusCursor()
 }

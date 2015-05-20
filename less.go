@@ -51,7 +51,7 @@ func (less *Less) Render(canvas wind.Canvas) {
 	endY := min(oy+h, len(less.buffer))
 	for y, row := range less.buffer[oy:endY] {
 		endX := min(ox+w, len(row))
-		if ox < len(row) {
+		if ox < len(row) && ox >= 0 {
 			for x, c := range row[ox:endX] {
 				canvas.Draw(x, y, c, 0, 0)
 			}
@@ -69,10 +69,7 @@ func (less *Less) SetText(text string) {
 		buffer = append(buffer, []rune(line))
 	}
 	less.buffer = buffer
-
-	less.view.cursX = 0
-	less.view.cursY = 0
-	less.view.repositionCursor()
+	less.view.CursorHome()
 }
 
 func (less *Less) ScrollUp() {
