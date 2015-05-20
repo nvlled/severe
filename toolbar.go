@@ -85,11 +85,12 @@ func (tb *toolbar) DefaultKeys() control.Keymap {
 		term.KeyArrowUp:    func(_ *control.Flow) { tb.CursorUp() },
 		term.KeyArrowLeft:  func(_ *control.Flow) { tb.CursorLeft() },
 		term.KeyArrowRight: func(_ *control.Flow) { tb.CursorRight() },
-		term.KeyEsc:        func(flow *control.Flow) { flow.Stop() },
+		term.KeyEsc:        func(flow *control.Flow) {},
 	}
 }
 
 func (tb *toolbar) Control(flow *control.Flow) {
 	keymap := tb.DefaultKeys()
-	flow.TermSwitch(control.Opts{}, keymap)
+	opts := control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)}
+	flow.TermSwitch(opts, keymap)
 }
