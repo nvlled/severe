@@ -97,18 +97,6 @@ func (lbox *listbox) Render(canvas wind.Canvas) {
 	}
 }
 
-//func (lbox *listbox) Focus() {
-//	lbox.focused = true
-//}
-//
-//func (lbox *listbox) Unfocus() {
-//	lbox.focused = false
-//}
-//
-//func (lbox *listbox) IsFocused() bool {
-//	return lbox.focused
-//}
-
 func (lbox *listbox) SelectDown() {
 	lbox.view.CursorDown()
 }
