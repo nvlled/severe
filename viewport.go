@@ -83,9 +83,13 @@ func (view *Viewport) pointBounds() (int, int) {
 	return view.bounds(x, y)
 }
 
-func (view *Viewport) setCursorX(x int) {
-	view.cursX += x
-	//view.moveCursorRight()
+func (view *Viewport) SetCursorX(x int) {
+	view.cursX = x
+	view.repositionCursor()
+}
+
+func (view *Viewport) SetCursorY(y int) {
+	view.cursY = y
 	view.repositionCursor()
 }
 

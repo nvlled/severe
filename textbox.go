@@ -154,7 +154,7 @@ func (tbox *textbox) backspace() {
 		tbox.buffer = buffer
 		tbox.view.CursorUp()
 
-		tbox.view.setCursorX(len(prevline))
+		tbox.view.SetCursorX(len(prevline))
 	}
 }
 
