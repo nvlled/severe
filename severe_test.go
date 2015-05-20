@@ -133,7 +133,7 @@ func TestListbox(t *testing.T) {
 		"eleven",
 	})
 
-	lbox := Listbox(20, 5, items)
+	lbox := NewListbox(20, 5, items)
 	layer := wind.Vlayer(
 		wind.Border('-', '|', lbox),
 		wind.Text(`** Ctrl-c to exit`),
@@ -153,10 +153,10 @@ func TestListbox(t *testing.T) {
 			EventEnded: func(_ interface{}) { drawLayer() },
 			Interrupt: control.Interrupts(
 				control.KeyInterrupt(term.KeyEnter),
-				func(e interface{}, stop func()) {
+				func(e interface{}, ir control.Irctrl) {
 					if e, ok := e.(term.Event); ok && e.Key == term.KeyCtrlC {
 						cancelled = true
-						stop()
+						ir.Stop()
 					}
 				},
 			),
@@ -241,9 +241,9 @@ func TestToolbar(t *testing.T) {
 			EventEnded: func(_ interface{}) { drawLayer() },
 			Interrupt: control.Interrupts(
 				control.KeyInterrupt(term.KeyCtrlC),
-				control.TermInterrupt(func(e term.Event, stop func()) {
+				control.TermInterrupt(func(e term.Event, ir control.Irctrl) {
 					if e.Key == term.KeyEnter {
-						stop()
+						ir.Stop()
 						selected = true
 					}
 				}),
@@ -267,7 +267,7 @@ func TestSevere1(t *testing.T) {
 
 	editor := Textbox(20, 10)
 	editor.SetBuffer("nope")
-	colorList := Listbox(10, 10, ItemSlice([]string{
+	colorList := NewListbox(10, 10, ItemSlice([]string{
 		"default", "red", "blue", "yellow", "green",
 	}))
 
@@ -283,12 +283,24 @@ func TestSevere1(t *testing.T) {
 	color := uint16(term.ColorDefault)
 	setColorBtn := Button("|set bgcolor|")
 	setColorBtn.Controller = func(flow *control.Flow) {
+		selected := false
 		flow.New(
-			control.Opts{Interrupt: control.KeyInterrupt(term.KeyEnter)},
+			control.Opts{
+				Interrupt: control.TermInterrupt(func(e term.Event, ir control.Irctrl) {
+					if e.Key == term.KeyEnter {
+						selected = true
+						ir.Stop()
+					}
+				})},
 			func(flow *control.Flow) {
+				i, _ := colorList.SelectedItem()
 				colorList.Control(flow)
-				_, colorName := colorList.SelectedItem()
-				color = uint16(colorValue(colorName))
+				if selected {
+					_, colorName := colorList.SelectedItem()
+					color = uint16(colorValue(colorName))
+				} else {
+					colorList.SetIndex(i)
+				}
 			})
 	}
 

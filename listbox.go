@@ -21,6 +21,7 @@ import (
 // │6. six       │
 // │─────────────│
 
+// TODO: rename to ListItems
 type Items interface {
 	GetItems() []string
 }
@@ -33,21 +34,21 @@ func (items ItemSlice) GetItems() []string {
 
 type ItemsFn func() []string
 
-func (fn ItemsFn) Items() []string { return fn() }
+func (fn ItemsFn) GetItems() []string { return fn() }
 
-type listbox struct {
+type Listbox struct {
 	Focusable
 	focused bool
 	TabSym  string
 
-	items Items
+	Items Items
 	view  *Viewport
 	//OnSelect func(index int, item string)
 }
 
-func Listbox(w, h int, items Items) *listbox {
-	return &listbox{
-		items: items,
+func NewListbox(w, h int, items Items) *Listbox {
+	return &Listbox{
+		Items: items,
 		view: &Viewport{
 			w: w,
 			h: h,
@@ -60,19 +61,19 @@ func Listbox(w, h int, items Items) *listbox {
 	}
 }
 
-func (lbox *listbox) Width() size.T {
+func (lbox *Listbox) Width() size.T {
 	return size.Const(lbox.view.w)
 }
 
-func (lbox *listbox) Height() size.T {
+func (lbox *Listbox) Height() size.T {
 	return size.Const(lbox.view.h)
 }
 
-func (lbox *listbox) Render(canvas wind.Canvas) {
+func (lbox *Listbox) Render(canvas wind.Canvas) {
 	_, cursY := lbox.view.Cursor()
 	_, offY := lbox.view.Offset()
 	_, h := lbox.view.Size()
-	items := lbox.items.GetItems()
+	items := lbox.Items.GetItems()
 
 	endY := min(offY+h, len(items))
 	for y, item := range items[offY:endY] {
@@ -97,25 +98,28 @@ func (lbox *listbox) Render(canvas wind.Canvas) {
 	}
 }
 
-func (lbox *listbox) SelectDown() {
+func (lbox *Listbox) SelectDown() {
 	lbox.view.CursorDown()
 }
 
-func (lbox *listbox) SelectUp() {
+func (lbox *Listbox) SelectUp() {
 	lbox.view.CursorUp()
 }
 
-func (lbox *listbox) SelectedItem() (int, string) {
+func (lbox *Listbox) SelectedItem() (int, string) {
 	_, i := lbox.view.Point()
-	items := lbox.items.GetItems()
+	items := lbox.Items.GetItems()
 	return i, items[i]
 }
 
-func (lbox *listbox) DefaultKeys() control.Keymap {
+func (lbox *Listbox) SetIndex(i int) {
+	lbox.view.SetCursorY(i)
+}
+
+func (lbox *Listbox) DefaultKeys() control.Keymap {
 	return control.Keymap{
 		term.KeyArrowUp:   func(_ *control.Flow) { lbox.SelectUp() },
 		term.KeyArrowDown: func(_ *control.Flow) { lbox.SelectDown() },
-
 		//term.KeyEnter: func() {
 		//	if lbox.OnSelect != nil {
 		//		items := lbox.items.GetItems()
@@ -128,7 +132,7 @@ func (lbox *listbox) DefaultKeys() control.Keymap {
 	}
 }
 
-func (lbox *listbox) Control(flow *control.Flow) {
+func (lbox *Listbox) Control(flow *control.Flow) {
 	//flow.Switch(lbox.DefaultKeys())
 	keymap := lbox.DefaultKeys()
 	flow.TermSwitch(control.Opts{}, keymap)
