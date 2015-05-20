@@ -19,7 +19,6 @@ func (fn bufferFunc) Buffer() [][]rune { return fn() }
 // *** there must be at least one newline in the buffer
 type Textbox struct {
 	Focusable
-	wrap   bool
 	buffer [][]rune
 	view   *Viewport
 }

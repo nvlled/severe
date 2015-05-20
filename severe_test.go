@@ -261,6 +261,51 @@ func TestToolbar(t *testing.T) {
 	}
 }
 
+func TestLess(t *testing.T) {
+	less := NewLess(25, 8)
+
+	less.SetText(`*********************************************
+********************* ************************************ *****
+*  ****   ******* *********** * **** *** ******** *** **********
+**     *********  **   ***** ***** *    ********* ** *** *******
+*   ***************** *****  ******************** ****** *** ***
+***  **** *  ** ************* ******** **   * ***** *******  ***
+***** ** **  ** *** ***** ****  ** ****** ******* * ****** ** **
+****  ** *** *** ** ** *** *** *** *** *** ****** **  ***** ***
+***  **** *  ** *** *******   *****  * ** ******* **** *********
+**  ** ***  ****  *************  *********    *********** * ****
+*****   ***************** **************************************
+*********`)
+
+	layer := wind.Vlayer(
+		wind.Border('.', '.', less),
+		wind.Text(`
+		** Arrow keys to scroll view
+		** Ctrl-c to cancel
+		`),
+	)
+
+	canvas := wind.NewTermCanvas()
+	draw := func() {
+		layer.Render(canvas)
+		term.Flush()
+	}
+
+	term.Init()
+	draw()
+	control.New(
+		control.TermSource,
+		control.Opts{
+			EventEnded: func(_ interface{}) { draw() },
+			Interrupt:  control.KeyInterrupt(term.KeyCtrlC),
+		},
+		func(flow *control.Flow) {
+			less.Control(flow)
+		},
+	)
+	term.Close()
+}
+
 func TestSevere1(t *testing.T) {
 	defer antiFuck()
 	term.Init()
