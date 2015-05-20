@@ -11,46 +11,46 @@ import (
 // | @ # $ % ^ & |
 // | A B C D E F |
 
-type toolbar struct {
+type Toolbar struct {
 	cursX int
 	cursY int
 	icons [][]rune
 }
 
-func Toolbar(icons ...[]rune) *toolbar {
-	return &toolbar{
+func NewToolbar(icons ...[]rune) *Toolbar {
+	return &Toolbar{
 		cursX: 0,
 		cursY: 0,
 		icons: icons,
 	}
 }
 
-func (tb *toolbar) CursorDown() {
+func (tb *Toolbar) CursorDown() {
 	if tb.cursY < len(tb.icons)-1 {
 		tb.cursY++
 	}
 }
 
-func (tb *toolbar) CursorUp() {
+func (tb *Toolbar) CursorUp() {
 	if tb.cursY > 0 {
 		tb.cursY--
 	}
 }
 
-func (tb *toolbar) CursorRight() {
+func (tb *Toolbar) CursorRight() {
 	row := tb.icons[tb.cursY]
 	if tb.cursX < len(row)-1 {
 		tb.cursX++
 	}
 }
 
-func (tb *toolbar) CursorLeft() {
+func (tb *Toolbar) CursorLeft() {
 	if tb.cursX > 0 {
 		tb.cursX--
 	}
 }
 
-func (tb *toolbar) Width() size.T {
+func (tb *Toolbar) Width() size.T {
 	if len(tb.icons) == 0 {
 		return size.Const(0)
 	}
@@ -58,11 +58,11 @@ func (tb *toolbar) Width() size.T {
 	return size.Const(n*2 + 1)
 }
 
-func (tb *toolbar) Height() size.T {
+func (tb *Toolbar) Height() size.T {
 	return size.Const(len(tb.icons))
 }
 
-func (tb *toolbar) Render(canvas wind.Canvas) {
+func (tb *Toolbar) Render(canvas wind.Canvas) {
 	for y, row := range tb.icons {
 		for x, c := range row {
 			bg := term.ColorDefault
@@ -75,11 +75,11 @@ func (tb *toolbar) Render(canvas wind.Canvas) {
 	}
 }
 
-func (tb *toolbar) Selected() rune {
+func (tb *Toolbar) Selected() rune {
 	return tb.icons[tb.cursY][tb.cursX]
 }
 
-func (tb *toolbar) DefaultKeys() control.Keymap {
+func (tb *Toolbar) DefaultKeys() control.Keymap {
 	return control.Keymap{
 		term.KeyArrowDown:  func(_ *control.Flow) { tb.CursorDown() },
 		term.KeyArrowUp:    func(_ *control.Flow) { tb.CursorUp() },
@@ -89,7 +89,7 @@ func (tb *toolbar) DefaultKeys() control.Keymap {
 	}
 }
 
-func (tb *toolbar) Control(flow *control.Flow) {
+func (tb *Toolbar) Control(flow *control.Flow) {
 	keymap := tb.DefaultKeys()
 	opts := control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)}
 	flow.TermSwitch(opts, keymap)

@@ -216,7 +216,7 @@ func TestToolbar(t *testing.T) {
 	term.Init()
 	canvas := wind.NewTermCanvas()
 
-	tbar := Toolbar(
+	tbar := NewToolbar(
 		[]rune("abcdef"),
 		[]rune("ghijkl"),
 		[]rune("@#$$%^"),
