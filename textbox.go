@@ -17,15 +17,15 @@ type bufferFunc func() [][]rune
 func (fn bufferFunc) Buffer() [][]rune { return fn() }
 
 // *** there must be at least one newline in the buffer
-type textbox struct {
+type Textbox struct {
 	Focusable
 	wrap   bool
 	buffer [][]rune
 	view   *Viewport
 }
 
-func Textbox(w, h int) *textbox {
-	tbox := &textbox{
+func NewTextbox(w, h int) *Textbox {
+	tbox := &Textbox{
 		buffer: nil,
 		view: &Viewport{
 			h: h,
@@ -36,8 +36,8 @@ func Textbox(w, h int) *textbox {
 	return tbox
 }
 
-func Textfield(w int) *textbox {
-	return Textbox(w, 1)
+func Textfield(w int) *Textbox {
+	return NewTextbox(w, 1)
 
 }
 
@@ -52,11 +52,11 @@ func makeBufferBounds(buf bufferer) func(int, int) (int, int) {
 	}
 }
 
-func (tbox *textbox) Buffer() [][]rune {
+func (tbox *Textbox) Buffer() [][]rune {
 	return tbox.buffer
 }
 
-func (tbox *textbox) SetBuffer(text string) {
+func (tbox *Textbox) SetBuffer(text string) {
 	var buffer [][]rune
 	for _, line := range strings.Split(text, "\n") {
 		buffer = append(buffer, []rune(line+"\n"))
@@ -65,15 +65,15 @@ func (tbox *textbox) SetBuffer(text string) {
 	tbox.buffer = buffer
 }
 
-func (tbox *textbox) Width() size.T {
+func (tbox *Textbox) Width() size.T {
 	return size.Const(tbox.view.w)
 }
 
-func (tbox *textbox) Height() size.T {
+func (tbox *Textbox) Height() size.T {
 	return size.Const(tbox.view.h)
 }
 
-func (tbox *textbox) Render(canvas wind.Canvas) {
+func (tbox *Textbox) Render(canvas wind.Canvas) {
 	if len(tbox.buffer) == 0 {
 		return
 	}
@@ -99,7 +99,7 @@ func (tbox *textbox) Render(canvas wind.Canvas) {
 	canvas.Draw(cx, cy, tbox.buffer[oy+cy][ox+cx], 0, uint16(term.ColorBlue))
 }
 
-func (tbox *textbox) insertChar(ch rune) {
+func (tbox *Textbox) InsertChar(ch rune) {
 	x, y := tbox.view.Point()
 	line := tbox.buffer[y]
 	rest := line[x:]
@@ -111,7 +111,7 @@ func (tbox *textbox) insertChar(ch rune) {
 	tbox.view.CursorRight()
 }
 
-func (tbox *textbox) breakline() {
+func (tbox *Textbox) InsertNewline() {
 	// *** Assumes line has a line terminator in it
 	//     that is to say, ∀line, len(line) >= 1 and ('\n' ∈ line)
 	x, y := tbox.view.Point()
@@ -133,7 +133,7 @@ func (tbox *textbox) breakline() {
 	tbox.view.CursorHome()
 }
 
-func (tbox *textbox) backspace() {
+func (tbox *Textbox) DeleteBack() {
 	x, y := tbox.view.Point()
 	line := tbox.buffer[y]
 	if x > 0 {
@@ -158,29 +158,31 @@ func (tbox *textbox) backspace() {
 	}
 }
 
-// TODO: decouple control
-func (tbox *textbox) Control(flow *control.Flow) {
+func (tbox *Textbox) CursorUp()    { tbox.view.CursorUp() }
+func (tbox *Textbox) CursorDown()  { tbox.view.CursorDown() }
+func (tbox *Textbox) CursorLeft()  { tbox.view.CursorLeft() }
+func (tbox *Textbox) CursorRight() { tbox.view.CursorRight() }
+
+func (tbox *Textbox) Control(flow *control.Flow) {
 	flow.TermTransfer(control.Opts{}, func(_ *control.Flow, e term.Event) {
 		if e.Ch != 0 {
-			tbox.insertChar(e.Ch)
+			tbox.InsertChar(e.Ch)
 		} else {
 			switch e.Key {
 			case term.KeyEnter:
-				tbox.breakline()
+				tbox.InsertNewline()
 			case term.KeyDelete:
-				tbox.backspace()
+				tbox.DeleteBack()
 			case term.KeySpace:
-				tbox.insertChar(' ')
+				tbox.InsertChar(' ')
 			case term.KeyArrowDown:
-				tbox.view.CursorDown()
+				tbox.CursorDown()
 			case term.KeyArrowRight:
-				tbox.view.CursorRight()
+				tbox.CursorRight()
 			case term.KeyArrowLeft:
-				tbox.view.CursorLeft()
+				tbox.CursorLeft()
 			case term.KeyArrowUp:
-				tbox.view.CursorUp()
-				//case term.KeyEsc:
-				//return true
+				tbox.CursorUp()
 			}
 		}
 	})

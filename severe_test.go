@@ -182,7 +182,7 @@ func TestTextbox(t *testing.T) {
 	term.Init()
 	canvas := wind.NewTermCanvas()
 
-	tbox := Textbox(50, 10)
+	tbox := NewTextbox(50, 10)
 	buffer := newTestBuffer()
 	tbox.buffer = buffer
 	layer := wind.Vlayer(
@@ -265,7 +265,7 @@ func TestSevere1(t *testing.T) {
 	defer antiFuck()
 	term.Init()
 
-	editor := Textbox(20, 10)
+	editor := NewTextbox(20, 10)
 	editor.SetBuffer("nope")
 	colorList := NewListbox(10, 10, ItemSlice([]string{
 		"default", "red", "blue", "yellow", "green",
