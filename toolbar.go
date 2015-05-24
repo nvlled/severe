@@ -94,3 +94,8 @@ func (tb *Toolbar) Control(flow *control.Flow) {
 	opts := control.Opts{Interrupt: control.KeyInterrupt(term.KeyEsc)}
 	flow.TermSwitch(opts, keymap)
 }
+
+func (tb *Toolbar) Choose(flow *control.Flow) rune {
+	tb.Control(flow)
+	return tb.Selected()
+}

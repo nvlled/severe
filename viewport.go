@@ -29,6 +29,10 @@ func (view *Viewport) Size() (int, int) {
 	return view.w, view.h
 }
 
+func (view *Viewport) SetSize(w, h int) {
+	view.w, view.h = w, h
+}
+
 func (view *Viewport) CursorHome() {
 	view.cursX = 0
 	view.offX = 0

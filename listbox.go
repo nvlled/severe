@@ -101,6 +101,10 @@ func (lbox *Listbox) SelectUp() {
 	lbox.view.CursorUp()
 }
 
+func (lbox *Listbox) RepositionCursor() {
+	lbox.view.repositionCursor()
+}
+
 func (lbox *Listbox) SelectedItem() (int, string) {
 	_, i := lbox.view.Point()
 	items := lbox.Items.GetItems()
@@ -108,6 +112,11 @@ func (lbox *Listbox) SelectedItem() (int, string) {
 		return -1, ""
 	}
 	return i, items[i]
+}
+
+func (lbox *Listbox) Choose(flow *control.Flow) (int, string) {
+	lbox.Control(flow)
+	return lbox.SelectedItem()
 }
 
 func (lbox *Listbox) SetIndex(i int) {
