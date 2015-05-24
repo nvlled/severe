@@ -4,49 +4,46 @@ import (
 	term "github.com/nsf/termbox-go"
 	"github.com/nvlled/control"
 	"github.com/nvlled/wind"
-	"github.com/nvlled/wind/size"
 	"strings"
 )
 
 type Less struct {
+	Sizable
 	Focusable
+
 	buffer [][]rune
 	view   *Viewport
-	w      int
-	h      int
 	maxw   int
 }
 
 func NewLess(w, h int) *Less {
 	less := &Less{
-		w:    w,
-		h:    h,
 		maxw: 0,
 		view: &Viewport{
+			// cursor isn't needed, just the offset;
+			// so set viewsize to 1x1
 			h: 1,
 			w: 1,
 		},
 	}
+
+	less.Sizable.w = w
+	less.Sizable.h = h
+
 	less.view.bounds = func(_, _ int) (int, int) {
-		return less.maxw - less.w + 1, len(less.buffer) - less.h + 1
+		w, h := less.Size()
+		return less.maxw - w + 1, len(less.buffer) - h + 1
 	}
 	return less
 }
 
-func (less *Less) Width() size.T {
-	return size.Const(less.w)
-}
-
-func (less *Less) Height() size.T {
-	return size.Const(less.h)
-}
-
 func (less *Less) Render(canvas wind.Canvas) {
+	less.SetSize(canvas.Dimension())
 	canvas.Clear()
 
 	view := less.view
 	ox, oy := view.Offset()
-	w, h := less.w, less.h
+	w, h := less.Size()
 
 	endY := min(oy+h, len(less.buffer))
 	for y, row := range less.buffer[oy:endY] {

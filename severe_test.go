@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+// TODO: Handle timeout on tests
+
 const viewW = 3
 const viewH = 3
 
@@ -133,9 +135,11 @@ func TestListbox(t *testing.T) {
 		"eleven",
 	})
 
-	lbox := NewListbox(20, 5, items)
+	lbox := NewListbox(0, 0, items)
+	lbox.AutoSize = true
+
 	layer := wind.Vlayer(
-		wind.Border('-', '|', lbox),
+		wind.Border('-', '|', wind.SizeW(20, lbox).FreeHeight()),
 		wind.Text(`** Ctrl-c to exit`),
 		wind.Text(`** Enter to select`),
 	)
@@ -182,7 +186,9 @@ func TestTextbox(t *testing.T) {
 	term.Init()
 	canvas := wind.NewTermCanvas()
 
-	tbox := NewTextbox(50, 10)
+	tbox := NewTextbox(30, 10)
+	tbox.AutoSize = false
+
 	buffer := newTestBuffer()
 	tbox.buffer = buffer
 	layer := wind.Vlayer(
@@ -262,7 +268,8 @@ func TestToolbar(t *testing.T) {
 }
 
 func TestLess(t *testing.T) {
-	less := NewLess(25, 8)
+	less := NewLess(0, 0)
+	less.AutoSize = true
 
 	less.SetText(`*********************************************
 ********************* ************************************ *****
@@ -278,7 +285,7 @@ func TestLess(t *testing.T) {
 *********`)
 
 	layer := wind.Vlayer(
-		wind.Border('.', '.', less),
+		wind.Border('.', '.', wind.Size(30, 10, less)),
 		wind.Text(`
 		** Arrow keys to scroll view
 		** Ctrl-c to cancel
@@ -356,14 +363,14 @@ func TestSevere1(t *testing.T) {
 				wind.Border('.', '.', editor),
 				editBtn,
 			),
-			wind.SizeW(3, wind.CharBlock(' ')),
+			wind.LineV(' '),
 			wind.Vlayer(
 				wind.Text("color"),
 				wind.Border('.', '.', colorList),
 				setColorBtn,
 			),
 		),
-		wind.Line('─'),
+		wind.LineH('─'),
 		wind.Text(`
 		** Arrow keys to move focus
 		** Enter to control focused component

@@ -4,7 +4,6 @@ import (
 	term "github.com/nsf/termbox-go"
 	"github.com/nvlled/control"
 	"github.com/nvlled/wind"
-	"github.com/nvlled/wind/size"
 )
 
 // adding items in the list
@@ -36,8 +35,10 @@ type ItemsFn func() []string
 
 func (fn ItemsFn) GetItems() []string { return fn() }
 
+// TODO: rename to List
 type Listbox struct {
 	Focusable
+	Sizable
 	focused bool
 	TabSym  string
 
@@ -48,10 +49,9 @@ type Listbox struct {
 
 func NewListbox(w, h int, items Items) *Listbox {
 	return &Listbox{
-		Items: items,
+		Sizable: Sizable{w: w, h: h},
+		Items:   items,
 		view: &Viewport{
-			w: w,
-			h: h,
 			bounds: func(_, _ int) (int, int) {
 				// note: lbox.items and items may happen
 				// to be different if lbox.items is re-assigned
@@ -61,15 +61,10 @@ func NewListbox(w, h int, items Items) *Listbox {
 	}
 }
 
-func (lbox *Listbox) Width() size.T {
-	return size.Const(lbox.view.w)
-}
-
-func (lbox *Listbox) Height() size.T {
-	return size.Const(lbox.view.h)
-}
-
 func (lbox *Listbox) Render(canvas wind.Canvas) {
+	lbox.SetSize(canvas.Dimension())
+	lbox.view.SetSize(lbox.Size())
+
 	_, cursY := lbox.view.Cursor()
 	_, offY := lbox.view.Offset()
 	_, h := lbox.view.Size()

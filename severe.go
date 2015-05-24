@@ -324,3 +324,26 @@ func (_ *nilComp) IsFocused() bool {
 }
 
 var NilComponent = new(nilComp)
+
+type Sizable struct {
+	w, h     int
+	AutoSize bool
+}
+
+func (s *Sizable) Width() size.T {
+	return size.Const(s.w)
+}
+
+func (s *Sizable) Height() size.T {
+	return size.Const(s.h)
+}
+
+func (s *Sizable) Size() (int, int) {
+	return s.w, s.h
+}
+
+func (s *Sizable) SetSize(w, h int) {
+	if s.AutoSize {
+		s.w, s.h = w, h
+	}
+}

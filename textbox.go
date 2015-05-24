@@ -4,7 +4,6 @@ import (
 	term "github.com/nsf/termbox-go"
 	"github.com/nvlled/control"
 	"github.com/nvlled/wind"
-	"github.com/nvlled/wind/size"
 	"strings"
 )
 
@@ -19,17 +18,16 @@ func (fn bufferFunc) Buffer() [][]rune { return fn() }
 // *** there must be at least one newline in the buffer
 type Textbox struct {
 	Focusable
+	Sizable
 	buffer [][]rune
 	view   *Viewport
 }
 
 func NewTextbox(w, h int) *Textbox {
 	tbox := &Textbox{
-		buffer: nil,
-		view: &Viewport{
-			h: h,
-			w: w,
-		},
+		Sizable: Sizable{w: w, h: h},
+		buffer:  nil,
+		view:    new(Viewport),
 	}
 	tbox.view.bounds = makeBufferBounds(tbox)
 	return tbox
@@ -64,18 +62,13 @@ func (tbox *Textbox) SetBuffer(text string) {
 	tbox.buffer = buffer
 }
 
-func (tbox *Textbox) Width() size.T {
-	return size.Const(tbox.view.w)
-}
-
-func (tbox *Textbox) Height() size.T {
-	return size.Const(tbox.view.h)
-}
-
 func (tbox *Textbox) Render(canvas wind.Canvas) {
 	if len(tbox.buffer) == 0 {
 		return
 	}
+	tbox.SetSize(canvas.Dimension())
+	tbox.view.SetSize(tbox.Size())
+
 	view := tbox.view
 	ox, oy := view.Offset()
 	w, h := view.Size()
